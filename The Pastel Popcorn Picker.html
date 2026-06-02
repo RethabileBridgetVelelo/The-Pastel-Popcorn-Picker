@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pastel Popcorn Picker | Cute Movie Matcher</title>
+    <style>
+        :root {
+            --bg-cream: #fffdf9;
+            --pink-soft: #ffeef2;
+            --pink-accent: #ffb7c5;
+            --text-dark: #4a3b32;
+            --white: #ffffff;
+            --gray-light: #f5f5f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            padding: 20px;
+            background-color: var(--white);
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(255, 183, 197, 0.15);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--pink-accent);
+            letter-spacing: 1px;
+        }
+
+        .main-container {
+            max-width: 450px;
+            width: 90%;
+            margin: 40px auto;
+            text-align: center;
+        }
+
+        /* Swiping Card Area */
+        .card-container {
+            position: relative;
+            height: 340px;
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .movie-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(255, 183, 197, 0.2);
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid var(--pink-soft);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+        }
+
+        .movie-emoji {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .movie-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 5px 0;
+        }
+
+        .movie-genre {
+            font-size: 0.85rem;
+            background: var(--pink-soft);
+            color: #d6687f;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .movie-desc {
+            font-size: 0.9rem;
+            color: #7d6e65;
+            margin-top: 15px;
+            line-height: 1.4;
+        }
+
+        /* Action Buttons */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+
+        .action-btn {
+            border: none;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-nay {
+            background-color: #f7ece9;
+            color: #c97d6b;
+        }
+
+        .btn-yay {
+            background-color: var(--pink-accent);
+            color: var(--white);
+        }
+
+        /* Saved Watchlist Drawer */
+        .watchlist-box {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px dashed var(--pink-accent);
+            text-align: left;
+        }
+
+        .watchlist-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            color: var(--pink-accent);
+        }
+
+        .list-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .list-items li {
+            background: var(--pink-soft);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Cute Float Keyframe Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🍿 Pastel Popcorn Picker 🍿</h1>
+    </header>
+
+    <div class="main-container">
+        
+        <div class="card-container">
+            <!-- The Card Layout -->
+            <div class="movie-card" id="movieCard">
+                <div class="movie-emoji" id="movieEmoji">🧜‍♀️</div>
+                <div class="movie-title" id="movieTitle">The Little Mermaid</div>
+                <span class="movie-genre" id="movieGenre">Fantasy / Romance</span>
+                <p class="movie-desc" id="movieDesc">A beautiful young mermaid makes a cozy, musical bargain with a sea witch to explore the vibrant world above water.</p>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="action-btn btn-nay" onclick="handleSwipe(false)">Nay 🙅‍♀️</button>
+            <button class="action-btn btn-yay" onclick="handleSwipe(true)">Yay 🍿</button>
+        </div>
+
+        <div class="watchlist-box">
+            <h3> My Sweet Watchlist ✨</h3>
+            <ul class="list-items" id="watchlist">
+                <!-- Swiped matches show up here dynamically! -->
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // Sample dataset of cute/aesthetic movies
+        const movies = [
+            { title: "Kiki's Delivery Service", emoji: "🧹", genre: "Studio Ghibli", desc: "A resourceful young witch spends a lovely year living independently while operating an airborne bakery delivery service." },
+            { title: "Legally Blonde", emoji: "🛍️", genre: "Comedy / Glam", desc: "An incredibly fashionable sorority queen heads to Harvard Law School to win back her ex, proving smarts come in pink." },
+            { title: "The Secret World of Arrietty", emoji: "🌱", genre: "Fantasy / Cozy", desc: "Tiny little people live completely hidden beneath the floorboards of a beautiful, overgrown country garden villa." },
+            { title: "Barbie", emoji: "💒", genre: "Adventure / Glam", desc: "Stereotypical Barbie experiences a hilarious existential crisis that takes her straight into the real, chaotic world." },
+            { title: "Amélie", emoji: "🍓", genre: "Romance / Aesthetic", desc: "A whimsical Parisian waitress orchestrates tiny, anonymous acts of beautiful kindness for neighbors all over town." }
+        ];
+
+        let currentIndex = 0;
+        const card = document.getElementById('movieCard');
+
+        function handleSwipe(isYay) {
+            if (currentIndex >= movies.length) return;
+
+            // Animate card sliding away elegantly
+            card.style.transform = isYay ? 'translateX(180px) rotate(15deg)' : 'translateX(-180px) rotate(-15deg)';
+            card.style.opacity = '0';
+
+            // If user clicked Yay, append to the watchlist dashboard below
+            if (isYay) {
+                const currentMovie = movies[currentIndex];
+                const list = document.getElementById('watchlist');
+                const li = document.createElement('li');
+                li.innerText = `${currentMovie.emoji} ${currentMovie.title}`;
+                list.appendChild(li);
+            }
+
+            currentIndex++;
+
+            // Wait for swiping transition to finish before swapping content and snapping back
+            setTimeout(() => {
+                if (currentIndex < movies.length) {
+                    // Update content layout smoothly
+                    document.getElementById('movieEmoji').innerText = movies[currentIndex].emoji;
+                    document.getElementById('movieTitle').innerText = movies[currentIndex].title;
+                    document.getElementById('movieGenre').innerText = movies[currentIndex].genre;
+                    document.getElementById('movieDesc').innerText = movies[currentIndex].desc;
+
+                    // Instantly center card and fade it back into view safely
+                    card.style.transform = 'translateX(0) rotate(0)';
+                    card.style.opacity = '1';
+                } else {
+                    // Out of movies screen
+                    card.innerHTML = `<div class="movie-emoji">🎉</div><div class="movie-title">All Matched Up!</div><p class="movie-desc">You've sorted through all the current recommendations. Enjoy your cozy movie night!</p>`;
+                    card.style.transform = 'translateX(0) rotate(0)';
+                    card.style.opacity = '1';
+                }
+            }, 400);
+        }
+    </script>
+
+</body>
+</html>
